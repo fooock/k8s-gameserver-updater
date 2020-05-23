@@ -1,0 +1,32 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: gameserver-updater
+spec:
+  schedule: "@hourly"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: gameserver-updater
+              image: csgoservers/steamcmd:fb03058
+              command:
+                - ./steamcmd.sh
+              args:
+                - +login
+                - anonymous
+                - +force_install_dir
+                - /home/steam/csgo
+                - +app_update
+                - '740'
+                - +quit
+              volumeMounts:
+                - name: gameserver-data
+                  mountPath: /home/steam/csgo
+          restartPolicy: Never
+          volumes:
+            - name: gameserver-data
+              persistentVolumeClaim:
+                claimName: gameserver-pvc

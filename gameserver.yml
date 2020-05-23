@@ -1,0 +1,35 @@
+apiVersion: "agones.dev/v1"
+kind: GameServer
+metadata:
+  name: csgo-server
+spec:
+  ports:
+    - name: udp
+      containerPort: 27025
+      protocol: UDP
+      portPolicy: Static
+      hostPort: 27025
+    - name: tcp
+      containerPort: 27025
+      protocol: TCP
+      portPolicy: Static
+      hostPort: 27025
+  template:
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+      - name: csgo-server
+        image: csgoservers/csgo-gameserver
+        imagePullPolicy: Never
+        volumeMounts:
+          - name: gameserver-data
+            mountPath: /home/steam/csgo
+      restartPolicy: Never
+      volumes:
+        - name: gameserver-data
+          persistentVolumeClaim:
+            claimName: gameserver-pvc
+            readOnly: true
